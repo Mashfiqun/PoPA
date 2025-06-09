@@ -75,7 +75,7 @@ allprojects {
 
 project(':simulator') {
     // mainClassName = 'SimBlock.simulator.Main' //Regular PoW
-    mainClassName = 'SimBlock.simulator.Main_PoS' // PoS
+    mainClassName = 'SimBlock.simulator.MainPoPA' // PoS
 
     def distSettings = {
         archiveBaseName.set('SimBlock')
