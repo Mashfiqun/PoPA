@@ -16,14 +16,18 @@
 
 package SimBlock.node;
 
-import static SimBlock.simulator.Main_PoS.OUT_JSON_FILE;
-import static SimBlock.simulator.Timer.getCurrentTime;
-
-import SimBlock.block.PoPABlock;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
+
+import SimBlock.block.PoPABlock;
+import static SimBlock.simulator.Main_PoS.OUT_JSON_FILE;
+import static SimBlock.simulator.Timer.getCurrentTime;
 
 /**
  * PoPA-specific node class that extends the core Node class.
@@ -35,6 +39,18 @@ public class PoPANode extends Node {
     private double totalReward = 0.0;
     private String deviceID;
     private String hashType;
+    private List<String> rewardHistory = new ArrayList<>();
+    private List<String> reputationHistory = new ArrayList<>();
+    private Map<String, Double> activitySources = new HashMap<>();
+    private int blocksMined = 0;
+
+    public void incrementBlocksMined() {
+        this.blocksMined++;
+    }
+    
+    public int getBlocksMined() {
+        return this.blocksMined;
+    }
 
     public PoPANode(
         int nodeID,
@@ -58,6 +74,7 @@ public class PoPANode extends Node {
 
     public void assignDeviceID(int nodeId) {
         this.deviceID = "device-" + nodeId + "-" + new Random().nextInt(10000);
+
     }
 
     public String getDeviceID() {
@@ -135,19 +152,66 @@ public class PoPANode extends Node {
         return this.reputationScore;
     }
 
+    // public void adjustReputation(boolean successfulBlock) {
+    //     if (successfulBlock) {
+    //         this.reputationScore = Math.min(1.0, this.reputationScore + 0.01);
+    //     } else {
+    //         this.reputationScore = Math.max(0.1, this.reputationScore - 0.01);
+    //     }
+    // }
+
+    // NEW REP ADJUSTMENT METHOD
     public void adjustReputation(boolean successfulBlock) {
+        double prev = this.reputationScore;
+        double oldScore = this.reputationScore; // Store old score for history
         if (successfulBlock) {
             this.reputationScore = Math.min(1.0, this.reputationScore + 0.01);
+            reputationHistory.add("SUCCESS | " + getCurrentTime() + " | From: " + oldScore + " → " + this.reputationScore);
         } else {
             this.reputationScore = Math.max(0.1, this.reputationScore - 0.01);
+            reputationHistory.add("FAILURE | " + getCurrentTime() + " | From: " + oldScore + " → " + this.reputationScore);
         }
+        String log = String.format("Time=%d, Prev=%.2f, New=%.2f", System.currentTimeMillis(), prev, this.reputationScore);
+        reputationHistory.add(log);
     }
 
+
+    // public void accumulateReward(double reward) {
+    //     this.totalReward += reward;
+    // }
+
+    //NEW ADDITIONS
     public void accumulateReward(double reward) {
         this.totalReward += reward;
+        String log = String.format("Time=%d, Reward=%.2f, Total=%.2f", System.currentTimeMillis(), reward, totalReward);
+        rewardHistory.add(log); 
     }
+
+    public void addActivityFromSource(String source, double score) {
+        activitySources.put(source, score);
+        // Optionally average or sum these scores for composite activity
+        updateActivityScore();
+    }
+
+    private void updateActivityScore() {
+        double total = 0.0;
+        for (double s : activitySources.values()) total += s;
+        this.activityScore = total / activitySources.size();  // or sum, depending on your model
+    }
+
 
     public double getTotalReward() {
         return this.totalReward;
+    }
+
+    // GETTER METHODS FOR HISTORIES
+    public List<String> getRewardHistory() {
+        return this.rewardHistory;
+    }
+    public List<String> getReputationHistory() {
+        return this.reputationHistory;
+    }
+    public Map<String, Double> getActivitySources() {
+        return this.activitySources;
     }
 }
