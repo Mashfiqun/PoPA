@@ -22,15 +22,14 @@ PoPA modifies the [SimBlock](https://github.com/dsg-titech/simblock) blockchain 
 │   ├── node/
 │   │   └── PoPANode.java          # Node class with activity sensing, reputation, rewards
 │   ├── simulator/
-│   │   └── PoPAMain.java          # Main class that runs PoPA simulation
+│   │   └── MainPoPA.java          # Main class that runs PoPA simulation
 │   └── task/
-│   │   └── ActivityMiningTask.java
-# (optional future extension: PoPA minting tasks)
+│   │   └── ActivityMiningTask.java     # (optional future extension: PoPA minting tasks)
 │
 ├── settings/
 │   └── SimulationConfiguration.java   # Configure number of nodes, intervals, difficulty
-├── output/
-│   └── popa_output.json          # Logs from the simulation
+├── dist/output/
+│   └── output.json          # Logs from the simulation
 ```
 
 ---
